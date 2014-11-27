@@ -1,0 +1,291 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.image.*;
+import java.awt.geom.*;
+import javax.imageio.*;
+import java.io.*;
+import java.awt.image.BufferedImage.*;
+import java.awt.event.*;
+
+
+public class GBoard extends JPanel
+{
+  static int enNumX = 9;
+  static int enNumY = 5;
+  static int enNumZ = 3;
+  static int bttNum = 3;
+  static int ry = 0;
+  static int cursX=0;
+  static int cursY=0;
+  static int waveNum=0;
+  static int waveLeft=10;
+  static int resting=400;
+  static int waitTime=1000;
+  static boolean clk = false;
+  static boolean cont = false;  
+  static Entity[][][] entt = new Entity[enNumX][enNumY][enNumZ];
+  //static Button[] bttn = new Button[bttNum];
+  
+  public GBoard()
+  {
+    for (int i = 0; i<enNumX; i++)
+    {
+      for(int j = 0; j<enNumY; j++)
+      {
+        for(int k = 0; k<enNumZ; k++)
+          entt[i][j][k] = new Entity(i,j,k);
+      }
+    }
+    /*
+     for (int i = 0; i < bttNum; i++)
+     {
+     
+     }
+     */
+  }
+  
+  private static void nextWave()
+  {
+    waveNum++;
+    waveLeft = (waveNum*5) + 10;
+    if (waveNum < 15)
+      resting = (waveNum*20) + 400;
+    else
+      resting = 700;
+  }
+  
+  public static void moveC(int cx, int cy)
+  {
+    cursX = cx;
+    cursY = cy;
+  }
+  
+  public static int[] getSelected()
+  {
+    int[] selXY = new int[] {enNumX+1,enNumY+1};
+    for (int i = 0; i<enNumX; i++)
+    {
+      for(int j = 0; j<enNumY; j++) 
+      {
+        if (entt[i][j][0].getSelected())
+        {
+          selXY[0] = i;
+          selXY[1] = j;
+        }
+      }
+    }
+    return selXY;
+  }
+  
+  public static void keyPress(char press)
+  {
+    int[] selEnt = getSelected();
+    if (selEnt[0]<enNumX-1)
+    {
+      if (selEnt[0] <= enNumX)
+      {
+        
+        //Empty Space (0 Dph)
+        if (press == '0')
+        {
+          entt[selEnt[0]][selEnt[1]][0].setValues(0,0,0,0);
+        }
+        
+        //Basic Tower (100 Dph)
+        if (press == '1')
+        {
+          entt[selEnt[0]][selEnt[1]][0].setValues(100,25,25,1);
+        }
+        
+        //Pierceing Tower (80 Dph)
+        if (press == '2')
+        {
+          //entt[selEnt[0]][selEnt[1]][0].setValues(100,25,20,2);
+        }
+        
+        //Rapid Fire (150 Dph)
+        if (press == '3')
+        {
+          entt[selEnt[0]][selEnt[1]][0].setValues(100,10,15,3);
+        }
+        
+        //Splash Tower (125 Dph)
+        if (press == '4')
+        {
+          //entt[selEnt[0]][selEnt[1]][0].setValues(100,20,25,4);
+        }
+        
+        //Melee Tower (200 Dph)
+        if (press == '5')
+        {
+          entt[selEnt[0]][selEnt[1]][0].setValues(100,100,200,5);
+        }
+        
+        //Defense Tower (0 Dph)
+        if (press == '6')
+        {
+          //entt[selEnt[0]][selEnt[1]][0].setValues(300,0,0,6);
+        }
+        
+        //Support Tower (0 Dph)
+        if (press == '7')
+        {
+          //entt[selEnt[0]][selEnt[1]][0].setValues(100,0,0,7);
+        }
+        
+        //Collection Tower (0 Dph)
+        if (press == '8')
+        {
+          //entt[selEnt[0]][selEnt[1]][0].setValues(100,0,0,8);
+        }
+        
+      }
+    }
+  }
+  
+  public static void setClk(boolean click)
+  {
+    clk = click;
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+  //   ATTACK METHOD
+  
+  
+  public static void attack(int x, int y, int z, int hp, int cd, int str, int id, Graphics g)
+  {
+    int rang = Entity.getRange(id);
+    
+    if (id > 9)
+      //ENEMY ATTACK
+    {
+      if (x > 0)
+        //If not on last space
+      {
+        for (int i = 1; i < enNumZ; i++)
+        {
+        if (entt[x-1][y][i].getID() == 0)
+        {
+          //if the space ahead is free
+          if (entt[x-1][y][0].getID() == 0)
+          {
+            //if there are no towers, move forward.
+            entt[x-1][y][i].setValues(hp,cd,str,id);
+            entt[x][y][z].destroy();
+            return;
+          }
+          else
+          {
+            //if there is a tower, attack
+            entt[x][y][z].setAttack(true, x+1);
+            entt[x-1][y][0].attacked(str); 
+            entt[x][y][z].reCool();
+          }
+        }
+        }
+        
+      }
+      else
+      {
+        //if they are on the last space
+        entt[x][y][z].destroy();
+      }
+    }
+    else
+    {
+      //TOWER ATTACK
+      for (int i = x; (i-x <= rang)&&(i < enNumX); i++) 
+      {
+        for(int j = 0; j<enNumZ; j++) 
+        {
+          if (entt[i][y][j].getID() > 9 && !entt[i][y][j].getDead())
+          {
+            //if there is a live enemy within attack range, attack
+            entt[i][y][j].attacked(str);
+            entt[x][y][z].setAttack(true, i);
+            entt[x][y][z].reCool();
+            return;
+          }
+        }
+      }
+      //if there are no enemies do not fire a projectile
+      entt[x][y][z].setAttack(false, 0);
+    }
+  }
+  
+  public static int getWave()
+  {
+    return waveNum;
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  //~~~~~~~~~~~~~~~~PAINT METHOD!!!~~~~|
+  //                                 V
+  @Override 
+  public void paint(Graphics g)
+  { 
+    super.paint(g);
+    g.setColor(Color.green);
+    g.fillRect(0, 0, getWidth(), getHeight());
+    
+    for (int i = 0; i<enNumX; i++)
+    {
+      for(int j = 0; j<enNumY; j++) 
+      {
+        for(int k = 0; k<enNumZ; k++)
+        {
+          entt[i][j][k].drawGrid(g, cursX, cursY, clk);
+        }
+      }
+    }
+    for (int i = 0; i<enNumX; i++)
+    {
+      for(int j = 0; j<enNumY; j++) 
+      {
+        for(int k = 0; k<enNumZ; k++)
+        {
+          entt[i][j][k].drawEntt(g, cursX, cursY, clk);
+        }
+      }
+    }
+    
+    
+    if (waveLeft > 0)
+    {
+      if ((int)(Math.random()*(waitTime/(waveNum+1))) == 0 || waitTime <= 1)
+      {
+        ry = (int)(Math.random()*enNumY);
+        cont = true;
+        for(int i = 1; i<enNumZ && cont; i++) 
+        {
+          if (entt[enNumX-1][ry][i].getID() == 0)
+          {
+            entt[enNumX-1][(int)(ry)][i].setValues(((int)(Math.random()*(waveNum))+6)*13, 33, 25*(1+(waveNum/10)), 10);
+            cont = false;
+            waveLeft--;
+            waitTime = 130;
+          }
+        }
+      }
+      else
+        waitTime--;
+    }
+    else
+      resting--;
+    if (resting < 1)
+      nextWave();
+  }
+}
