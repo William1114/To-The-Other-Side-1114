@@ -14,6 +14,7 @@ class Entity extends JPanel
   static int high = 75;
   static int tGap = 200;
   static int lGap = 100;
+  //Width & Height and gaps at top and left of the screen
   static BufferedImage cW1;
   static BufferedImage cW2;
   static BufferedImage cW3;
