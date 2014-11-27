@@ -1,0 +1,126 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.image.*;
+import java.awt.geom.*;
+import javax.imageio.*;
+import java.io.*;
+import java.awt.image.BufferedImage.*;
+import java.awt.event.*;
+
+class GScreenTest extends JPanel 
+{
+  
+  public static void main(String[] args) throws InterruptedException 
+  {
+    int width = 1024;
+    int height = 768;
+    JFrame frame = new JFrame("GScreen");
+    GBoard brd  = new GBoard();
+    frame.setSize(width, height);
+    frame.add(brd);
+    frame.setVisible(true);
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    MouseL mouseL = new MouseL();
+    frame.add(mouseL);
+    
+    while (true)
+    {
+      frame.setTitle(""+GBoard.getWave());
+      brd.repaint();
+      Thread.sleep(10);
+    }
+    
+  }
+}
+
+
+
+class MouseL extends JPanel {
+  public MouseL()
+  {    
+    MouseListener mlistener = new MyMouseX(); 
+    addMouseListener(mlistener);
+    setFocusable(true);
+    
+    MouseMotionListener mlistener2 = new MyMouseM(); 
+    addMouseMotionListener(mlistener2);
+    setFocusable(true);
+    
+    KeyListener listen = new MyKeyL();
+    addKeyListener(listen); 
+    setFocusable(true); 
+  }
+}
+
+
+
+class MyMouseM implements MouseMotionListener
+{
+  public void mouseDragged(MouseEvent e)
+  {
+    GBoard.moveC(e.getX(), e.getY());
+  }
+  
+  public void mouseMoved(MouseEvent e)
+  {
+    GBoard.moveC(e.getX(), e.getY());
+  }
+}
+
+
+class MyMouseX implements MouseListener
+{
+  @Override
+  public void mousePressed(MouseEvent e)
+  {
+    GBoard.setClk(true);
+    GBoard.moveC(e.getX(), e.getY());
+  }
+  
+  @Override
+  public void mouseClicked(MouseEvent e)
+  {
+    
+  }
+  
+  @Override
+  public void mouseReleased(MouseEvent e)
+  {
+    GBoard.setClk(false);
+    GBoard.moveC(e.getX(), e.getY());
+  }
+  
+  @Override
+  public void mouseEntered(MouseEvent e)
+  {
+  }
+  
+  @Override
+  public void mouseExited(MouseEvent e)
+  {
+  }
+} 
+
+class MyKeyL implements KeyListener 
+{ 
+
+  public MyKeyL()
+  {
+  }
+  
+  @Override 
+  public void keyTyped(KeyEvent e) 
+  {
+  } 
+  
+  @Override
+  public void keyPressed(KeyEvent e)
+  { 
+    GBoard.keyPress((KeyEvent.getKeyText(e.getKeyCode())).charAt(0));
+  }
+  
+  @Override
+  public void keyReleased(KeyEvent e) 
+  { 
+  }
+}
