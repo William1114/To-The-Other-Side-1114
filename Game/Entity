@@ -1,0 +1,353 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.image.*;
+import java.awt.geom.*;
+import javax.imageio.*;
+import java.io.*;
+import java.awt.image.BufferedImage.*;
+import java.awt.event.*;
+
+
+class Entity extends JPanel
+{
+  static int wide = 100;
+  static int high = 75;
+  static int tGap = 200;
+  static int lGap = 100;
+  static BufferedImage cW1;
+  static BufferedImage cW2;
+  static BufferedImage cW3;
+  static BufferedImage cA1;
+  static BufferedImage cA2;
+  static BufferedImage cA3;
+  static BufferedImage cP1;
+  static BufferedImage cP2;
+  static BufferedImage cP3;
+  static BufferedImage cP4;
+  int hp = 0;
+  int id = 0;
+  int cooldown = 0;
+  int reCooldown = 0;
+  int strength = 0;
+  int x;
+  int y;
+  int z;
+  int target = 0;
+  int deathX = 0;
+  boolean selected;
+  boolean attack = false;
+  boolean dead = false;
+  
+  
+  public Entity(int gx,int gy, int gz)
+  {
+    x = gx;
+    y = gy;
+    z = gz;
+    cW1 = null;
+    
+    //       Walk pngs
+    try {
+      cW1 = ImageIO.read(new File("Chicken Walk 1.png"));
+    } catch (IOException e) 
+    {
+    }
+    
+    try {
+      cW2 = ImageIO.read(new File("Chicken Walk 2.png"));
+    } catch (IOException e) 
+    {
+    }
+    
+    try {
+      cW3 = ImageIO.read(new File("Chicken Walk 3.png"));
+    } catch (IOException e) 
+    {
+    }
+    
+    //     Attack pngs
+    
+    try {
+      cA1 = ImageIO.read(new File("Chicken Attack 1.png"));
+    } catch (IOException e) 
+    {
+    }
+    
+    try {
+      cA2 = ImageIO.read(new File("Chicken Attack 2.png"));
+    } catch (IOException e) 
+    {
+    }
+    
+    try {
+      cA3 = ImageIO.read(new File("Chicken Attack 3.png"));
+    } catch (IOException e) 
+    {
+    }
+    
+    //Pop pngs
+    
+    try {
+      cP1 = ImageIO.read(new File("Chicken Pop 1.png"));
+    } catch (IOException e) 
+    {
+    }
+    
+    try {
+      cP2 = ImageIO.read(new File("Chicken Pop 2.png"));
+    } catch (IOException e) 
+    {
+    }
+    
+    try {
+      cP3 = ImageIO.read(new File("Chicken Pop 3.png"));
+    } catch (IOException e) 
+    {
+    }
+    
+    try {
+      cP4 = ImageIO.read(new File("Chicken Pop 4.png"));
+    } catch (IOException e) 
+    {
+    }
+    
+  }
+  
+  public void setAttack(boolean atk, int trgt)
+  {
+   attack = atk;
+   target = trgt;
+  }
+  
+  public int getID()
+  {
+    return id;
+  }
+  
+  public void destroy()
+  {
+    id = 0;
+    hp = 0;
+    cooldown = 0;
+    reCooldown = 0;
+    strength = 0;
+    dead = false;
+  }
+  
+  public boolean getDead()
+  {
+   return dead; 
+  }
+  
+  public boolean getSelected()
+  {
+   return selected; 
+  }
+  
+  public void setValues(int ghp, int cd, int str, int gid)
+  {
+    attack = false;
+    id = gid;
+    hp = ghp;
+    cooldown = cd;
+    reCooldown = cd;
+    strength = str;
+    if (id > 9)
+      selected = false;
+  }
+  
+  public void reCool()
+  {
+    reCooldown = cooldown;
+  }
+  
+  public void attacked(int damage)
+  {
+    hp = hp - damage;
+    if (hp <= 0)
+    {
+      if (!dead)
+      {
+        deathX = x*wide+lGap+z*10+(((int)(wide/cooldown))*(reCooldown));
+        cooldown = cooldown*2;
+        reCooldown = cooldown;
+      }
+      dead = true;
+    }
+  }
+  
+  public static int getRange(int idN)
+  {
+    if (idN == 0)
+      return 0;
+    
+    if (idN == 5)
+      return 1;
+    
+    if (idN == 1 || idN == 3)
+      return 8;
+    
+    return 1;
+    
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~draw Methods~I~~
+  //                                      V
+  
+  
+  
+  
+  public void drawGrid(Graphics g, int cx, int cy, boolean clk)
+  {   
+    if (z == 0 && x != 8)
+    {
+      g.setColor(Color.gray);
+      if ((cx>x*wide+lGap)&&(cx<=x*wide+wide+lGap)&&(cy>y*high+tGap)&&(cy<=y*high+high+tGap))
+      {
+        if (clk)
+        {
+          selected = true;
+        }
+        if (selected)
+          g.setColor(Color.darkGray);
+        else
+          g.setColor(Color.lightGray);
+      }
+      else
+      {
+       if (clk)
+          selected = false;
+       if (selected)
+          g.setColor(Color.darkGray);
+      }
+      g.fillRect(x*wide+lGap, y*high+tGap, wide, high);
+      
+      g.setColor(Color.darkGray);
+      g.drawLine(x*wide+lGap, y*high+tGap, x*wide+wide+lGap, y*high+tGap);
+      g.drawLine(x*wide+lGap, y*high+tGap, x*wide+lGap, y*high+high+tGap);
+    }
+    
+    if (id > 0)
+    {
+      if (reCooldown == 0)
+      {
+        if (dead)
+          destroy();
+        else
+          GBoard.attack(x, y, z, hp, cooldown, strength, id, g);
+      }
+      else
+        reCooldown--;
+    }
+  }
+  
+  public void drawEntt(Graphics g, int cx, int cy, boolean clk)
+  {
+    if (id > 0 && id < 10)
+    {
+      if (id == 1)
+      {
+        g.setColor(Color.red);
+      }
+      
+      if (id == 3)
+      {
+        g.setColor(Color.black);
+      }
+      
+      if (id == 5)
+      {
+        g.setColor(Color.white);
+      }
+      
+      if (reCooldown == 0)
+        g.setColor(Color.yellow);
+      
+      g.fillRect(x*wide+lGap, y*high+tGap, wide, high);
+    }
+    if (id > 9)
+    {
+      if (attack)
+        g.drawImage(getImage(id,cooldown,reCooldown,attack,dead,g),  x*wide+lGap+z*10,  y*high+tGap+z*10+10,  null);
+      if (dead)
+        g.drawImage(getImage(id,cooldown,reCooldown,attack,dead,g),  deathX,  y*high+tGap+z*10+10,  null);
+      if (!(attack||dead))
+        g.drawImage(getImage(id,cooldown,reCooldown,attack,dead,g),  x*wide+lGap+z*10+(((int)(wide/cooldown))*(reCooldown)),  y*high+tGap+z*10+10,  null);
+    }
+    else
+    {
+      if (attack && cooldown > 0)
+      {
+        g.setColor(Color.black);
+        g.drawRect(x*wide+lGap+((((target*wide+lGap+(wide/4)) - (x*wide+lGap))/cooldown)*(cooldown - reCooldown)) ,y*high+tGap+10 ,30,  30);
+      }
+    }
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  static BufferedImage getImage(int idN, int cool, int reCool, boolean atk, boolean ded, Graphics g)
+  {
+    if (idN == 10)
+    {
+      if (ded)
+      {
+        if (reCool >= 0 && reCool < cool*0.25)
+        return cP4;
+      if (reCool >= cool*0.25 && reCool < cool*0.5)
+        return cP3;
+      if (reCool >= cool*0.5 && reCool < cool*0.75)
+        return cP2;
+      if (reCool >= cool*0.75 && reCool < cool)
+        return cP1;
+      }
+      if (atk)
+      {
+        if (reCool >= 0 && reCool < cool*0.25)
+        return cA1;
+      if (reCool >= cool*0.25 && reCool < cool*0.5)
+        return cA2;
+      if (reCool >= cool*0.5 && reCool < cool*0.75)
+        return cA2;
+      if (reCool >= cool*0.75 && reCool < cool)
+        return cA3;
+      }
+      else
+      {
+      if (reCool >= 0 && reCool < cool*0.25)
+        return cW1;
+      if (reCool >= cool*0.25 && reCool < cool*0.5)
+        return cW2;
+      if (reCool >= cool*0.5 && reCool < cool*0.75)
+        return cW3;
+      if (reCool >= cool*0.75 && reCool < cool)
+        return cW2;
+      }
+      
+    }
+    return cW1;
+  }
+}
