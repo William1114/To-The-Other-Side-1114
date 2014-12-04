@@ -14,18 +14,7 @@ class Entity extends JPanel
   static int high = 75;
   static int tGap = 200;
   static int lGap = 100;
-  //Width & Height and gaps at top and left of the screen
-  static BufferedImage cW1;
-  static BufferedImage cW2;
-  static BufferedImage cW3;
-  static BufferedImage cA1;
-  static BufferedImage cA2;
-  static BufferedImage cA3;
-  static BufferedImage cP1;
-  static BufferedImage cP2;
-  static BufferedImage cP3;
-  static BufferedImage cP4;
-  int hp = 0;
+  int hp = 1;
   int id = 0;
   int cooldown = 0;
   int reCooldown = 0;
@@ -38,6 +27,7 @@ class Entity extends JPanel
   boolean selected;
   boolean attack = false;
   boolean dead = false;
+  static Images gphx = new Images();
   
   
   public Entity(int gx,int gy, int gz)
@@ -45,73 +35,11 @@ class Entity extends JPanel
     x = gx;
     y = gy;
     z = gz;
-    cW1 = null;
-    
-    //       Walk pngs
-    try {
-      cW1 = ImageIO.read(new File("Chicken Walk 1.png"));
-    } catch (IOException e) 
-    {
-    }
-    
-    try {
-      cW2 = ImageIO.read(new File("Chicken Walk 2.png"));
-    } catch (IOException e) 
-    {
-    }
-    
-    try {
-      cW3 = ImageIO.read(new File("Chicken Walk 3.png"));
-    } catch (IOException e) 
-    {
-    }
-    
-    //     Attack pngs
-    
-    try {
-      cA1 = ImageIO.read(new File("Chicken Attack 1.png"));
-    } catch (IOException e) 
-    {
-    }
-    
-    try {
-      cA2 = ImageIO.read(new File("Chicken Attack 2.png"));
-    } catch (IOException e) 
-    {
-    }
-    
-    try {
-      cA3 = ImageIO.read(new File("Chicken Attack 3.png"));
-    } catch (IOException e) 
-    {
-    }
-    
-    //Pop pngs
-    
-    try {
-      cP1 = ImageIO.read(new File("Chicken Pop 1.png"));
-    } catch (IOException e) 
-    {
-    }
-    
-    try {
-      cP2 = ImageIO.read(new File("Chicken Pop 2.png"));
-    } catch (IOException e) 
-    {
-    }
-    
-    try {
-      cP3 = ImageIO.read(new File("Chicken Pop 3.png"));
-    } catch (IOException e) 
-    {
-    }
-    
-    try {
-      cP4 = ImageIO.read(new File("Chicken Pop 4.png"));
-    } catch (IOException e) 
-    {
-    }
-    
+  }
+  
+  public boolean getAttack()
+  {
+   return attack;
   }
   
   public void setAttack(boolean atk, int trgt)
@@ -153,6 +81,7 @@ class Entity extends JPanel
     cooldown = cd;
     reCooldown = cd;
     strength = str;
+    dead = false;
     if (id > 9)
       selected = false;
   }
@@ -172,35 +101,25 @@ class Entity extends JPanel
         deathX = x*wide+lGap+z*10+(((int)(wide/cooldown))*(reCooldown));
         cooldown = cooldown*2;
         reCooldown = cooldown;
+        dead = true;
       }
-      dead = true;
     }
   }
   
   public static int getRange(int idN)
   {
-    if (idN == 0)
+    if (idN == 0 || (idN>=6&&idN<=8))
       return 0;
     
     if (idN == 5)
       return 1;
     
-    if (idN == 1 || idN == 3)
+    if (idN == 1 || idN == 3 || idN == 2)
       return 8;
     
     return 1;
     
   }
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
   
   
   
@@ -249,10 +168,15 @@ class Entity extends JPanel
         if (dead)
           destroy();
         else
+        {
+          if (!(id>=6&&id<=8))
           GBoard.attack(x, y, z, hp, cooldown, strength, id, g);
+        }
       }
       else
+      {
         reCooldown--;
+      }
     }
   }
   
@@ -265,6 +189,11 @@ class Entity extends JPanel
         g.setColor(Color.red);
       }
       
+      if (id == 2)
+      {
+        g.setColor(Color.orange);
+      }
+      
       if (id == 3)
       {
         g.setColor(Color.black);
@@ -275,7 +204,17 @@ class Entity extends JPanel
         g.setColor(Color.white);
       }
       
-      if (reCooldown == 0)
+      if (id == 6)
+      {
+        g.setColor(Color.magenta);
+      }
+      
+      if (id == 7)
+      {
+        g.setColor(Color.red);
+      }
+      
+      if (reCooldown == 0&&!(id>=6&&id<=8))
         g.setColor(Color.yellow);
       
       g.fillRect(x*wide+lGap, y*high+tGap, wide, high);
@@ -283,11 +222,11 @@ class Entity extends JPanel
     if (id > 9)
     {
       if (attack)
-        g.drawImage(getImage(id,cooldown,reCooldown,attack,dead,g),  x*wide+lGap+z*10,  y*high+tGap+z*10+10,  null);
+        g.drawImage(gphx.getImage(id,cooldown,reCooldown,attack,dead,g),  x*wide+lGap+z*10,  y*high+tGap+z*10+10,  null);
       if (dead)
-        g.drawImage(getImage(id,cooldown,reCooldown,attack,dead,g),  deathX,  y*high+tGap+z*10+10,  null);
+        g.drawImage(gphx.getImage(id,cooldown,reCooldown,attack,dead,g),  deathX,  y*high+tGap+z*10+10,  null);
       if (!(attack||dead))
-        g.drawImage(getImage(id,cooldown,reCooldown,attack,dead,g),  x*wide+lGap+z*10+(((int)(wide/cooldown))*(reCooldown)),  y*high+tGap+z*10+10,  null);
+        g.drawImage(gphx.getImage(id,cooldown,reCooldown,attack,dead,g),  x*wide+lGap+z*10+(((int)(wide/cooldown))*(reCooldown)),  y*high+tGap+z*10+10,  null);
     }
     else
     {
@@ -299,56 +238,4 @@ class Entity extends JPanel
     }
   }
   
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  static BufferedImage getImage(int idN, int cool, int reCool, boolean atk, boolean ded, Graphics g)
-  {
-    if (idN == 10)
-    {
-      if (ded)
-      {
-        if (reCool >= 0 && reCool < cool*0.25)
-        return cP4;
-      if (reCool >= cool*0.25 && reCool < cool*0.5)
-        return cP3;
-      if (reCool >= cool*0.5 && reCool < cool*0.75)
-        return cP2;
-      if (reCool >= cool*0.75 && reCool < cool)
-        return cP1;
-      }
-      if (atk)
-      {
-        if (reCool >= 0 && reCool < cool*0.25)
-        return cA1;
-      if (reCool >= cool*0.25 && reCool < cool*0.5)
-        return cA2;
-      if (reCool >= cool*0.5 && reCool < cool*0.75)
-        return cA2;
-      if (reCool >= cool*0.75 && reCool < cool)
-        return cA3;
-      }
-      else
-      {
-      if (reCool >= 0 && reCool < cool*0.25)
-        return cW1;
-      if (reCool >= cool*0.25 && reCool < cool*0.5)
-        return cW2;
-      if (reCool >= cool*0.5 && reCool < cool*0.75)
-        return cW3;
-      if (reCool >= cool*0.75 && reCool < cool)
-        return cW2;
-      }
-      
-    }
-    return cW1;
-  }
 }
