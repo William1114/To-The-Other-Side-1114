@@ -1,0 +1,88 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.image.*;
+import java.awt.geom.*;
+import javax.imageio.*;
+import java.io.*;
+import java.awt.image.BufferedImage.*;
+import java.awt.event.*;
+
+
+class Images extends JPanel
+{
+  static BufferedImage[] cW = new BufferedImage[3];
+  static BufferedImage[] cA = new BufferedImage[3];
+  static BufferedImage[] cP = new BufferedImage[4];
+  
+  public Images()
+  {
+    //       Walk pngs
+    cW = getImage("Chicken Walk ", cW.length);
+    
+    //      Attack pngs
+    
+    cA = getImage("Chicken Attack ", cA.length);
+    
+    //      Pop pngs
+    
+    cP = getImage("Chicken Pop ", cP.length);
+    
+  }
+  
+  static BufferedImage[] getImage(String s, int lng)
+  {
+    BufferedImage[] imgs = new BufferedImage[lng];
+    for (int i = 1; i<= lng; i++)
+    {
+      try {
+        imgs[i-1] = ImageIO.read(new File(s+i+".png"));
+      } catch (IOException e) 
+      {
+      }
+    }
+    return imgs;
+  }
+  
+  
+  static BufferedImage getImage(int idN, int cool, int reCool, boolean atk, boolean ded, Graphics g)
+  {
+    if (idN == 10)
+    {
+      if (ded)
+      {
+        if (reCool >= 0 && reCool < cool*0.25)
+        return cP[3];
+      if (reCool >= cool*0.25 && reCool < cool*0.5)
+        return cP[2];
+      if (reCool >= cool*0.5 && reCool < cool*0.75)
+        return cP[1];
+      if (reCool >= cool*0.75 && reCool < cool)
+        return cP[0];
+      }
+      if (atk)
+      {
+        if (reCool >= 0 && reCool < cool*0.25)
+        return cA[0];
+      if (reCool >= cool*0.25 && reCool < cool*0.5)
+        return cA[1];
+      if (reCool >= cool*0.5 && reCool < cool*0.75)
+        return cA[1];
+      if (reCool >= cool*0.75 && reCool < cool)
+        return cA[2];
+      }
+      else
+      {
+      if (reCool >= 0 && reCool < cool*0.25)
+        return cW[0];
+      if (reCool >= cool*0.25 && reCool < cool*0.5)
+        return cW[1];
+      if (reCool >= cool*0.5 && reCool < cool*0.75)
+        return cW[2];
+      if (reCool >= cool*0.75 && reCool < cool)
+        return cW[1];
+      }
+      
+    }
+    return cW[0];
+  }
+}
