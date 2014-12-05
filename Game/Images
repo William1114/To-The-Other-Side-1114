@@ -8,6 +8,12 @@ import java.awt.image.BufferedImage.*;
 import java.awt.event.*;
 
 
+/*
+ *    The Images class keeps track of all the graphics
+ * in the game. The graphics can be called from the 
+ * getImage(int, int, int, boolean, boolean)
+ */
+
 class Images extends JPanel
 {
   static BufferedImage[] cW = new BufferedImage[3];
@@ -44,7 +50,7 @@ class Images extends JPanel
   }
   
   
-  static BufferedImage getImage(int idN, int cool, int reCool, boolean atk, boolean ded, Graphics g)
+  static BufferedImage getImage(int idN, int cool, int reCool, boolean atk, boolean ded)
   {
     if (idN == 10)
     {
