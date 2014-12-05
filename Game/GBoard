@@ -7,24 +7,38 @@ import java.io.*;
 import java.awt.image.BufferedImage.*;
 import java.awt.event.*;
 
+/* 
+ *    The GBoard controlls the game itself, the enemies, 
+ * towers, attacks, key presses, the mouse and the graphics.
+ * 
+ */
+
 
 public class GBoard extends JPanel
 {
   static int enNumX = 9;
   static int enNumY = 5;
-  static int enNumZ = 3;
-  static int bttNum = 3;
+  static int enNumZ = 4;
+  //Number of entities on X, Y and Z axis
   static int ry = 0;
+  //Random y co-ordinate for generating enemies
   static int cursX=0;
   static int cursY=0;
+  // The X and Y of the curser
   static int waveNum=0;
+  //The wave of enemies that the game is at
   static int waveLeft=10;
-  static int resting=400;
-  static int waitTime=1000;
+  //Enemies left in the wave
+  static int resting=1000;
+  //Time that the game allows the player to rest between waves
+  static int waitTime=130;
+  //The max amount of time that the game makes the player wait between enemies attacking
   static boolean clk = false;
-  static boolean cont = false;  
+  //Whether or not the mouse is clicked
+  static boolean cont = false;
+  //Whether or not to continue searching for a place to put a randomly generating enemy
   static Entity[][][] entt = new Entity[enNumX][enNumY][enNumZ];
-  //static Button[] bttn = new Button[bttNum];
+  //All the entities in the game in 1 3D array!
   
   public GBoard()
   {
@@ -34,18 +48,14 @@ public class GBoard extends JPanel
       {
         for(int k = 0; k<enNumZ; k++)
           entt[i][j][k] = new Entity(i,j,k);
+        // generates all the entities on the board
       }
     }
-    /*
-     for (int i = 0; i < bttNum; i++)
-     {
-     
-     }
-     */
   }
   
   private static void nextWave()
   {
+    //Starts each wave of enemies
     waveNum++;
     waveLeft = (waveNum*5) + 10;
     if (waveNum < 15)
@@ -56,12 +66,14 @@ public class GBoard extends JPanel
   
   public static void moveC(int cx, int cy)
   {
+    //keeps track of the mouses location on the screen
     cursX = cx;
     cursY = cy;
   }
   
   public static int[] getSelected()
   {
+    //Finds the selected tile
     int[] selXY = new int[] {enNumX+1,enNumY+1};
     for (int i = 0; i<enNumX; i++)
     {
@@ -79,6 +91,8 @@ public class GBoard extends JPanel
   
   public static void keyPress(char press)
   {
+    //Changes tower type by pressing a button on the number pad
+   
     int[] selEnt = getSelected();
     if (selEnt[0]<enNumX-1)
     {
@@ -94,49 +108,49 @@ public class GBoard extends JPanel
         //Basic Tower (100 Dph)
         if (press == '1')
         {
-          entt[selEnt[0]][selEnt[1]][0].setValues(100,25,25,1);
+          entt[selEnt[0]][selEnt[1]][0].setValues(100,13,25,1);
         }
         
         //Pierceing Tower (80 Dph)
         if (press == '2')
         {
-          //entt[selEnt[0]][selEnt[1]][0].setValues(100,25,20,2);
+          entt[selEnt[0]][selEnt[1]][0].setValues(100,15,25,2);
         }
         
         //Rapid Fire (150 Dph)
         if (press == '3')
         {
-          entt[selEnt[0]][selEnt[1]][0].setValues(100,10,15,3);
+          entt[selEnt[0]][selEnt[1]][0].setValues(100,7,15,3);
         }
         
         //Splash Tower (125 Dph)
         if (press == '4')
         {
-          //entt[selEnt[0]][selEnt[1]][0].setValues(100,20,25,4);
+          entt[selEnt[0]][selEnt[1]][0].setValues(100,20,25,4);
         }
         
         //Melee Tower (200 Dph)
         if (press == '5')
         {
-          entt[selEnt[0]][selEnt[1]][0].setValues(100,100,200,5);
+          entt[selEnt[0]][selEnt[1]][0].setValues(100,50,200,5);
         }
         
         //Defense Tower (0 Dph)
         if (press == '6')
         {
-          //entt[selEnt[0]][selEnt[1]][0].setValues(300,0,0,6);
+          entt[selEnt[0]][selEnt[1]][0].setValues(700,3,0,6);
         }
         
         //Support Tower (0 Dph)
         if (press == '7')
         {
-          //entt[selEnt[0]][selEnt[1]][0].setValues(100,0,0,7);
+          entt[selEnt[0]][selEnt[1]][0].setValues(100,3,0,7);
         }
         
         //Collection Tower (0 Dph)
         if (press == '8')
         {
-          //entt[selEnt[0]][selEnt[1]][0].setValues(100,0,0,8);
+          //entt[selEnt[0]][selEnt[1]][0].setValues(100,3,0,8);
         }
         
       }
@@ -161,6 +175,8 @@ public class GBoard extends JPanel
   public static void attack(int x, int y, int z, int hp, int cd, int str, int id, Graphics g)
   {
     int rang = Entity.getRange(id);
+    int powerup = 0;
+    boolean target = false;
     
     if (id > 9)
       //ENEMY ATTACK
@@ -170,24 +186,24 @@ public class GBoard extends JPanel
       {
         for (int i = 1; i < enNumZ; i++)
         {
-        if (entt[x-1][y][i].getID() == 0)
-        {
-          //if the space ahead is free
-          if (entt[x-1][y][0].getID() == 0)
+          if (entt[x-1][y][i].getID() == 0)
           {
-            //if there are no towers, move forward.
-            entt[x-1][y][i].setValues(hp,cd,str,id);
-            entt[x][y][z].destroy();
-            return;
+            //if the space ahead is free
+            if (entt[x-1][y][0].getID() == 0)
+            {
+              //if there are no towers, move forward.
+              entt[x-1][y][i].setValues(hp,cd,str,id);
+              entt[x][y][z].destroy();
+              return;
+            }
+            else
+            {
+              //if there is a tower, attack
+              entt[x][y][z].setAttack(true, x+1);
+              entt[x-1][y][0].attacked(str); 
+              entt[x][y][z].reCool();
+            }
           }
-          else
-          {
-            //if there is a tower, attack
-            entt[x][y][z].setAttack(true, x+1);
-            entt[x-1][y][0].attacked(str); 
-            entt[x][y][z].reCool();
-          }
-        }
         }
         
       }
@@ -202,20 +218,64 @@ public class GBoard extends JPanel
       //TOWER ATTACK
       for (int i = x; (i-x <= rang)&&(i < enNumX); i++) 
       {
-        for(int j = 0; j<enNumZ; j++) 
+        if (entt[i][y][0].getID() == 7)
+          powerup++;
+        
+        for(int j = 1; j<enNumZ; j++)
         {
-          if (entt[i][y][j].getID() > 9 && !entt[i][y][j].getDead())
+          
+          if (entt[i][y][j].getID() > 9 /*&& !entt[i][y][j].getDead()*/)
           {
             //if there is a live enemy within attack range, attack
-            entt[i][y][j].attacked(str);
-            entt[x][y][z].setAttack(true, i);
+            entt[i][y][j].attacked(str+(powerup*20));
+            
+            if (!target)
+            {
+              if (id == 2)
+                entt[x][y][z].setAttack(true, enNumX-x);
+              else
+              {
+                entt[x][y][z].setAttack(true, i);
+              }
+            }
             entt[x][y][z].reCool();
-            return;
+            
+            target = true;
+            
+            
+            
+            if (id == 4)
+            {
+              //If it is a splash tower
+              if (y > 0)
+              {
+                if (entt[i][y-1][j].getID() > 9)
+                  entt[i][y-1][j].attacked(str+(powerup*20));
+                //if there is an enemy below, hit below
+              }
+              
+              if (y+1 < enNumY)
+              {
+                if (entt[i][y+1][j].getID() > 9)
+                  entt[i][y+1][j].attacked(str+(powerup*20));
+                //if there is an enemy above, hit above
+              }
+              
+              if (i+1 < enNumX)
+              {
+                if (entt[i+1][y][j].getID() > 9)
+                  entt[i+1][y][j].attacked(str+(powerup*20));
+                //if there is an enemy above, hit above
+              }
+              
+            }
+            
           }
         }
       }
       //if there are no enemies do not fire a projectile
-      entt[x][y][z].setAttack(false, 0);
+      if (!target)
+        entt[x][y][z].setAttack(false, 0);
     }
   }
   
@@ -225,7 +285,35 @@ public class GBoard extends JPanel
   }
   
   
-  
+  public static void newEn()
+  {
+    if (resting > 0)
+    {
+      resting--;
+    }
+    else
+    {
+      if ((int)(Math.random()*(waitTime/(waveNum+1))) == 0 || waitTime <= 1)
+      {
+        ry = (int)(Math.random()*enNumY);
+        cont = true;
+        for(int i = 1; i<enNumZ && cont; i++) 
+        {
+          if (entt[enNumX-1][ry][i].getID() == 0)
+          {
+            entt[enNumX-1][(int)(ry)][i].setValues(((int)(Math.random()*(waveNum))+9)*13, 33, 25*(1+(waveNum/10)), 10);
+            cont = false;
+            waveLeft--;
+            waitTime = 130;
+          }
+        }
+      }
+      else
+        waitTime--;
+    }
+    if (waveLeft < 1)
+      nextWave();
+  }
   
   
   
@@ -261,31 +349,6 @@ public class GBoard extends JPanel
         }
       }
     }
-    
-    
-    if (waveLeft > 0)
-    {
-      if ((int)(Math.random()*(waitTime/(waveNum+1))) == 0 || waitTime <= 1)
-      {
-        ry = (int)(Math.random()*enNumY);
-        cont = true;
-        for(int i = 1; i<enNumZ && cont; i++) 
-        {
-          if (entt[enNumX-1][ry][i].getID() == 0)
-          {
-            entt[enNumX-1][(int)(ry)][i].setValues(((int)(Math.random()*(waveNum))+6)*13, 33, 25*(1+(waveNum/10)), 10);
-            cont = false;
-            waveLeft--;
-            waitTime = 130;
-          }
-        }
-      }
-      else
-        waitTime--;
-    }
-    else
-      resting--;
-    if (resting < 1)
-      nextWave();
+    newEn();
   }
 }
