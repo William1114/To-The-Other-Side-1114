@@ -7,6 +7,12 @@ import java.io.*;
 import java.awt.image.BufferedImage.*;
 import java.awt.event.*;
 
+/*
+ *    The GScreen has the main method along with
+ * the keyboard and mouse listeners.
+ */
+
+
 class GScreenTest extends JPanel 
 {
   
@@ -25,9 +31,9 @@ class GScreenTest extends JPanel
     
     while (true)
     {
-      frame.setTitle(""+GBoard.getWave());
+      frame.setTitle("Wave: "+GBoard.getWave());
       brd.repaint();
-      Thread.sleep(10);
+      Thread.sleep(5);//30
     }
     
   }
