@@ -7,26 +7,49 @@ import java.io.*;
 import java.awt.image.BufferedImage.*;
 import java.awt.event.*;
 
+/*
+ *    Entity discribes all the spaces on the game board in which a
+ * tower, enemy or projectile can or do exist.
+ * 
+ *    Towers and enemies are both entities, and their data is stored
+ * as the tile that they are on.
+ * 
+ *    Chickens and projectiles appear to move across the tiles but 
+ * the projectiles are not their own class and only exist as graphics,
+ * chickens only move from tile to tile.
+ */
+
 
 class Entity extends JPanel
 {
   static int wide = 100;
   static int high = 75;
+  //Width and height of each space
   static int tGap = 200;
   static int lGap = 100;
+  //Gaps at the top and left of the screen
   int hp = 1;
   int id = 0;
+  //id is the type of tower or enemy being represented on the tile
   int cooldown = 0;
   int reCooldown = 0;
+  //cooldown is the amount of times between attacks and, for enemies, the amount of time to travel between tiles
   int strength = 0;
+  //strength is the amount of damage done when the tower or enemy attacks
   int x;
   int y;
+  //the X and Y co-ordinates of the tile relative to other tiles
   int z;
+  // the Z co-ordinate allows multiple entities to be on each tile.
+  // The towers all have a Z co-ordinate of 0 while enemies are 1 and higher
   int target = 0;
+  // the X co-ordinate of a targeted enemy
   int deathX = 0;
+  // the X co-ordinate an enemy is defeated at
   boolean selected;
   boolean attack = false;
   boolean dead = false;
+  //booleans whether the tile is selected, attacking or defeated.
   static Images gphx = new Images();
   
   
@@ -61,6 +84,7 @@ class Entity extends JPanel
     reCooldown = 0;
     strength = 0;
     dead = false;
+    //Resets entities stats to an empty tile
   }
   
   public boolean getDead()
@@ -84,6 +108,7 @@ class Entity extends JPanel
     dead = false;
     if (id > 9)
       selected = false;
+    //Sets the Entities values.
   }
   
   public void reCool()
@@ -104,6 +129,7 @@ class Entity extends JPanel
         dead = true;
       }
     }
+    //deals damage to entity and kills enemy if hp <= 0
   }
   
   public static int getRange(int idN)
@@ -113,6 +139,9 @@ class Entity extends JPanel
     
     if (idN == 5)
       return 1;
+    
+    if (idN == 4)
+      return 5;
     
     if (idN == 1 || idN == 3 || idN == 2)
       return 8;
@@ -135,6 +164,7 @@ class Entity extends JPanel
   {   
     if (z == 0 && x != 8)
     {
+      //Draws the tiles that towers can be placed on
       g.setColor(Color.gray);
       if ((cx>x*wide+lGap)&&(cx<=x*wide+wide+lGap)&&(cy>y*high+tGap)&&(cy<=y*high+high+tGap))
       {
@@ -154,11 +184,13 @@ class Entity extends JPanel
        if (selected)
           g.setColor(Color.darkGray);
       }
+      //Sets colour of tile if the mouse is hovering over the tile or ckicking tower
       g.fillRect(x*wide+lGap, y*high+tGap, wide, high);
       
       g.setColor(Color.darkGray);
       g.drawLine(x*wide+lGap, y*high+tGap, x*wide+wide+lGap, y*high+tGap);
       g.drawLine(x*wide+lGap, y*high+tGap, x*wide+lGap, y*high+high+tGap);
+      //Draws the grid between tiles
     }
     
     if (id > 0)
@@ -167,10 +199,12 @@ class Entity extends JPanel
       {
         if (dead)
           destroy();
+        //destroys dead entities
         else
         {
           if (!(id>=6&&id<=8))
           GBoard.attack(x, y, z, hp, cooldown, strength, id, g);
+          //if cooldown  is at 0 entity tries to attack
         }
       }
       else
@@ -199,6 +233,11 @@ class Entity extends JPanel
         g.setColor(Color.black);
       }
       
+      if (id == 4)
+      {
+        g.setColor(Color.black);
+      }
+      
       if (id == 5)
       {
         g.setColor(Color.white);
@@ -206,27 +245,37 @@ class Entity extends JPanel
       
       if (id == 6)
       {
-        g.setColor(Color.magenta);
+        g.setColor(Color.red);
       }
       
       if (id == 7)
       {
-        g.setColor(Color.red);
+        g.setColor(Color.magenta);
+      }
+      
+      if (id == 8)
+      {
+        g.setColor(Color.white);
       }
       
       if (reCooldown == 0&&!(id>=6&&id<=8))
         g.setColor(Color.yellow);
+      
+      //Temporary code defining colours of towers until graphics are made
       
       g.fillRect(x*wide+lGap, y*high+tGap, wide, high);
     }
     if (id > 9)
     {
       if (attack)
-        g.drawImage(gphx.getImage(id,cooldown,reCooldown,attack,dead,g),  x*wide+lGap+z*10,  y*high+tGap+z*10+10,  null);
+        g.drawImage(gphx.getImage(id,cooldown,reCooldown,attack,dead),  x*wide+lGap+z*10,  y*high+tGap+z*10+10,  null);
+      //draws attacking enemy
       if (dead)
-        g.drawImage(gphx.getImage(id,cooldown,reCooldown,attack,dead,g),  deathX,  y*high+tGap+z*10+10,  null);
+        g.drawImage(gphx.getImage(id,cooldown,reCooldown,attack,dead),  deathX,  y*high+tGap+z*10+10,  null);
+      //draws "popping" chicken
       if (!(attack||dead))
-        g.drawImage(gphx.getImage(id,cooldown,reCooldown,attack,dead,g),  x*wide+lGap+z*10+(((int)(wide/cooldown))*(reCooldown)),  y*high+tGap+z*10+10,  null);
+        g.drawImage(gphx.getImage(id,cooldown,reCooldown,attack,dead),  x*wide+lGap+z*10+(((int)(wide/cooldown))*(reCooldown)),  y*high+tGap+z*10+10,  null);
+      //draws moving chicken
     }
     else
     {
@@ -234,6 +283,7 @@ class Entity extends JPanel
       {
         g.setColor(Color.black);
         g.drawRect(x*wide+lGap+((((target*wide+lGap+(wide/4)) - (x*wide+lGap))/cooldown)*(cooldown - reCooldown)) ,y*high+tGap+10 ,30,  30);
+        //draws projectile
       }
     }
   }
